@@ -18,7 +18,7 @@ A middleware for [shelf](https://pub.dev/packages/shelf) and [dart_frog](https:/
 ## Quickstart 🚀
 
 ### Using Dart Frog 🎯🐸
-This is a simplified example. For a full example visit `/examples/dart_frog`
+This is a simplified example. For a full example visit [`/examples/dart_frog`](https://github.com/mtwichel/gcp_logger/tree/main/examples/dart_frog)
 #### Setup 🏗️
 
 Add the `GcpLogger` middlware in your top level `_middlware.dart` file.
@@ -44,7 +44,7 @@ Response onRequest(RequestContext context) {
 ```
 
 ### Using Shelf 🗄️
-This is a simplified example. For a full example visit `/examples/shelf`
+This is a simplified example. For a full example visit [`/examples/shelf`](https://github.com/mtwichel/gcp_logger/tree/main/examples/shelf)
 #### Setup 🏗️
 
 Add the `GcpLogger` middlware in your `Pipeline`.
