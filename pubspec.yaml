@@ -1,7 +1,7 @@
-name: gcp_logger
-description: A logger middleware for shelf and dart_frog that formats its messages for Google Cloud Logger
+name: request_logger
+description: A logger middleware for shelf and dart_frog
 version: 0.0.1-dev.1
-repository: https://github.com/mtwichel/gcp_logger
+repository: https://github.com/mtwichel/request_logger
 publish_to: none
 
 environment:

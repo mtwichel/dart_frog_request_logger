@@ -2,29 +2,26 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:gcp_logger/gcp_logger.dart';
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
+import 'package:request_logger/request_logger.dart';
 import 'package:shelf/shelf.dart';
-import 'package:stack_trace/stack_trace.dart';
 
-/// {@template gcp_logger}
-/// A logger middleware for shelf that formats its messages for
-/// Google Cloud Logger
+/// {@template request_logger}
+/// A logger middleware for shelf that formats its messages according to its
+/// `logFormatter`
 /// {@endtemplate}
-class GcpLogger {
-  /// {@macro gcp_logger}
-  const GcpLogger({
-    String? traceHeader,
-    String? projectId,
+class RequestLogger {
+  /// {@macro request_logger}
+  const RequestLogger({
+    required Request request,
     required LogFormatter logFormatter,
     @visibleForTesting Stdout? testingStdout,
-  })  : _traceHeader = traceHeader,
-        _projectId = projectId,
+  })  : _request = request,
         _logFormatter = logFormatter,
         _testingStdout = testingStdout;
 
-  final String? _traceHeader;
-  final String? _projectId;
+  final Request _request;
   final LogFormatter _logFormatter;
   final Stdout? _testingStdout;
 
@@ -154,13 +151,13 @@ class GcpLogger {
     Object? payload,
     Map<String, dynamic>? labels,
     StackTrace? stackTrace,
-    bool sendToErrorReporting = false,
+    bool isError = false,
     bool includeStacktrace = false,
     bool includeSourceLocation = true,
     List<String> packageExcludeList = const [
       'dart_frog',
       'shelf',
-      'gcp_logger'
+      'request_logger'
     ],
   }) {
     final _stdout = _testingStdout ?? stdout;
@@ -174,32 +171,27 @@ class GcpLogger {
       chain,
       packageExcludeList: packageExcludeList,
     );
-    final trace = _traceHeader?.split('/').first;
 
     final payloadMap = jsonDecode(jsonEncode(payload)) as Map<String, dynamic>?;
-
-    _stdout.writeln(
-      _logFormatter(
-        severity: severity,
-        message: message,
-        payload: payloadMap,
-        labels: labels,
-        projectId: _projectId,
-        trace: trace,
-        isError: sendToErrorReporting,
-        chain: includeStacktrace ? chain : null,
-        stackFrame: includeSourceLocation ? stackFrame : null,
-      ),
+    final logString = _logFormatter(
+      severity: severity,
+      message: message,
+      request: _request,
+      payload: payloadMap,
+      labels: labels,
+      isError: isError,
+      chain: includeStacktrace ? chain : null,
+      stackFrame: includeSourceLocation ? stackFrame : null,
     );
+
+    _stdout.writeln(logString);
   }
 
-  /// Middleware that injects the cloud logger and automatically logs
+  /// Middleware that injects `a` RequestLogger and automatically logs
   /// uncaught errors
   static Middleware middleware({
-    LogFormatter? logFormatter,
+    required LogFormatter logFormatter,
     bool shouldLogRequests = false,
-    @visibleForTesting
-        Future<String> Function() projectIdGetter = currentProjectId,
     @visibleForTesting DateTime Function() nowGetter = DateTime.now,
     @visibleForTesting Stdout? testingStdout,
   }) =>
@@ -210,27 +202,16 @@ class GcpLogger {
           final completer = Completer<Response>.sync();
 
           Request _request;
-          GcpLogger _logger;
-          try {
-            final projectId = await projectIdGetter();
-            _logger = GcpLogger(
-              projectId: projectId,
-              traceHeader: request.headers['X-Cloud-Trace-Context'],
-              logFormatter: logFormatter ?? formatCloudLoggingLog,
-              testingStdout: testingStdout,
-            );
-          } on NoProjectIdFoundException catch (e) {
-            _logger = GcpLogger(
-              logFormatter: logFormatter ?? formatSimpleLog,
-              testingStdout: testingStdout,
-            )..log(
-                Severity.warning,
-                e.message,
-                includeSourceLocation: false,
-              );
-          }
+          RequestLogger _logger;
+
+          _logger = RequestLogger(
+            request: request,
+            logFormatter: logFormatter,
+            testingStdout: testingStdout,
+          );
+
           _request = request.change(
-            context: {'GcpLogger': () => _logger},
+            context: {'RequestLogger': () => _logger},
           );
 
           Zone.current.fork(
@@ -248,13 +229,15 @@ class GcpLogger {
                   error.toString().trim(),
                   stackTrace: stackTrace,
                   includeStacktrace: true,
-                  sendToErrorReporting: true,
+                  isError: true,
                 );
 
                 if (shouldLogRequests) {
-                  _stdout.writeln(
+                  _logger.log(
+                    Severity.info,
                     '${startTime.toIso8601String()}\t${_request.method}'
                     '\t[500]\t${request.handlerPath}',
+                    includeSourceLocation: false,
                   );
                 }
 
@@ -270,9 +253,11 @@ class GcpLogger {
             () async {
               final response = await handler(_request);
               if (shouldLogRequests) {
-                _stdout.writeln(
+                _logger.log(
+                  Severity.info,
                   '${startTime.toIso8601String()}\t${_request.method}'
-                  '\t[${response.statusCode}]\t${request.handlerPath}',
+                  '\t[500]\t${request.handlerPath}',
+                  includeSourceLocation: false,
                 );
               }
               if (!completer.isCompleted) {
@@ -285,15 +270,35 @@ class GcpLogger {
         };
       };
 
-  /// Extracts the [GcpLogger] if injected using the [GcpLogger.middleware]
-  static GcpLogger extractLogger(Request request) {
+  /// Extracts the [RequestLogger] if injected using the
+  /// [RequestLogger.middleware]
+  static RequestLogger extractLogger(Request request) {
     // ignore: cast_nullable_to_non_nullable
-    final loggerGetter = request.context['GcpLogger'] as GcpLogger Function()?;
+    final loggerGetter =
+        request.context['RequestLogger'] as RequestLogger Function()?;
     if (loggerGetter == null) {
       throw StateError(
-        'No GcpLogger found. Did you forget to inject the GcpLogger.middlware?',
+        'No RequestLogger found. '
+        'Did you forget to inject the RequestLogger.middlware?',
       );
     }
     return loggerGetter();
   }
+}
+
+/// Returns a [Frame] from [chain] if possible, otherwise, `null`.
+Frame? frameFromChain(
+  Chain? chain, {
+  List<String> packageExcludeList = const [],
+}) {
+  if (chain == null || chain.traces.isEmpty) return null;
+
+  final trace = chain.traces.first;
+  if (trace.frames.isEmpty) return null;
+
+  final frame = trace.frames.firstWhereOrNull(
+    (frame) => !packageExcludeList.contains(frame.package),
+  );
+
+  return frame ?? trace.frames.first;
 }

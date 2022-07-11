@@ -1,4 +1,4 @@
-import 'package:gcp_logger/gcp_logger.dart';
+import 'package:request_logger/request_logger.dart';
 import 'package:test/test.dart';
 
 void main() {

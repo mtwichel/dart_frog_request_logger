@@ -1,5 +1,5 @@
 name: shelf_logger_example
-description: A server app using the shelf package with GcpLogger.
+description: A server app using the shelf package with RequestLogger.
 version: 1.0.0
 publish_to: none
 
@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   args: ^2.0.0
-  gcp_logger:
+  request_logger:
     path: ../..
   shelf: ^1.1.0
   shelf_router: ^1.0.0

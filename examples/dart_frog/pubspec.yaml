@@ -1,5 +1,5 @@
 name: dart_frog_logger_example
-description: An Dart Frog application demonstrating using GcpLogger
+description: An Dart Frog application demonstrating using RequestLogger
 version: 1.0.0+1
 publish_to: none
 
@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   dart_frog: ^0.0.1-dev
-  gcp_logger:
+  request_logger:
     path: ../..
 
 dev_dependencies:

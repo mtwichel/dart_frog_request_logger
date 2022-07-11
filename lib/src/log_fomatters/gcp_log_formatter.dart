@@ -1,57 +1,41 @@
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
-import 'package:gcp_logger/gcp_logger.dart';
 import 'package:meta/meta.dart';
+import 'package:request_logger/request_logger.dart';
+import 'package:shelf/shelf.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 /// Formats the log data into the proper format for Google Cloud Logging
-String formatCloudLoggingLog({
-  required Severity severity,
-  required String message,
-  String? trace,
-  String? projectId,
-  Map<String, dynamic>? payload,
-  Map<String, dynamic>? labels,
-  bool? isError,
-  Chain? chain,
-  Frame? stackFrame,
-}) {
-  final log = <String, dynamic>{
-    if (isError ?? false)
-      '@type':
-          'type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent',
-    ...?payload,
-    'severity': severity.toString(),
-    'message': message,
-    if (trace != null && projectId != null)
-      'logging.googleapis.com/trace': 'projects/$projectId/traces/$trace',
-    if (labels != null && labels.isNotEmpty)
-      'logging.googleapis.com/labels': labels,
-    if (chain != null) 'stackTrace': chain.toString().trim(),
-    if (stackFrame != null)
-      'logging.googleapis.com/sourceLocation':
-          frameToSourceInformation(stackFrame),
-  };
-  return jsonEncode(log);
-}
+LogFormatter formatCloudLoggingLog({required String projectId}) => ({
+      required Severity severity,
+      required String message,
+      required Request request,
+      Map<String, dynamic>? payload,
+      Map<String, dynamic>? labels,
+      bool? isError,
+      Chain? chain,
+      Frame? stackFrame,
+    }) {
+      final trace = request.headers['X-Cloud-Trace-Context']?.split('/').first;
 
-/// Returns a [Frame] from [chain] if possible, otherwise, `null`.
-Frame? frameFromChain(
-  Chain? chain, {
-  List<String> packageExcludeList = const [],
-}) {
-  if (chain == null || chain.traces.isEmpty) return null;
-
-  final trace = chain.traces.first;
-  if (trace.frames.isEmpty) return null;
-
-  final frame = trace.frames.firstWhereOrNull(
-    (frame) => !packageExcludeList.contains(frame.package),
-  );
-
-  return frame ?? trace.frames.first;
-}
+      final log = <String, dynamic>{
+        if (isError ?? false)
+          '@type':
+              'type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent',
+        ...?payload,
+        'severity': severity.toString(),
+        'message': message,
+        if (trace != null)
+          'logging.googleapis.com/trace': 'projects/$projectId/traces/$trace',
+        if (labels != null && labels.isNotEmpty)
+          'logging.googleapis.com/labels': labels,
+        if (chain != null) 'stackTrace': chain.toString().trim(),
+        if (stackFrame != null)
+          'logging.googleapis.com/sourceLocation':
+              frameToSourceInformation(stackFrame),
+      };
+      return jsonEncode(log);
+    };
 
 /// Formats a [Frame] into source information for Google Cloud logging
 @visibleForTesting

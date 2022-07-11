@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:gcp_logger/gcp_logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
 import 'package:shelf/shelf.dart' as shelf;
@@ -16,8 +15,6 @@ class MockChain extends Mock implements Chain {
     return ' chain ';
   }
 }
-
-class MockPlatformWrapper extends Mock implements PlatformWrapper {}
 
 class MockClient extends Mock implements http.Client {}
 

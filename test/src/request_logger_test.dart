@@ -2,8 +2,9 @@
 
 import 'dart:io';
 
-import 'package:gcp_logger/gcp_logger.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:request_logger/log_formatters.dart';
+import 'package:request_logger/request_logger.dart';
 import 'package:shelf/shelf.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:test/test.dart';
@@ -11,22 +12,25 @@ import 'package:test/test.dart';
 import '../_helpers/_helpers.dart';
 
 void main() {
-  group('GcpLogger', () {
+  group('RequestLogger', () {
+    final request = MockShelfRequest();
     group('log', () {
       test('writes log', () {
         final stdout = MockStdout();
-        GcpLogger(
-          logFormatter: formatSimpleLog,
+        RequestLogger(
+          logFormatter: formatSimpleLog(),
           testingStdout: stdout,
+          request: request,
         ).log(Severity.info, 'message');
         verify(() => stdout.writeln(any())).called(1);
       });
 
       test('convenience methods call log', () {
         final stdout = MockStdout();
-        GcpLogger(
-          logFormatter: formatSimpleLog,
+        RequestLogger(
+          logFormatter: formatSimpleLog(),
           testingStdout: stdout,
+          request: request,
         )
           ..alert('alert')
           ..critical('critical')
@@ -49,10 +53,9 @@ void main() {
         Map<String, dynamic>? labels,
         required String message,
         Map<String, dynamic>? payload,
-        String? projectId,
         required Severity severity,
         Frame? stackFrame,
-        String? trace,
+        required Request request,
       }) =>
           'log';
 
@@ -72,27 +75,11 @@ void main() {
         when(() => response.statusCode).thenReturn(200);
       });
 
-      test('creates new logger if running on gcp', () async {
-        final stdout = MockStdout();
-
-        final middleware = GcpLogger.middleware(
-          testingStdout: stdout,
-          projectIdGetter: () async => 'projectId',
-        );
-        final newHandler = middleware(
-          (request) => response,
-        );
-        await newHandler(request);
-
-        verifyNever(() => stdout.writeln());
-      });
-
       test('logs uncaught errors automatically', () async {
         final stdout = MockStdout();
 
-        final middleware = GcpLogger.middleware(
+        final middleware = RequestLogger.middleware(
           testingStdout: stdout,
-          projectIdGetter: () async => 'projectId',
           logFormatter: testingLogFormatter,
         );
         final newHandler = middleware(
@@ -107,7 +94,9 @@ void main() {
       });
 
       test('rethrows HijackExceptions', () async {
-        final middleware = GcpLogger.middleware();
+        final middleware = RequestLogger.middleware(
+          logFormatter: formatSimpleLog(),
+        );
         final newHandler = middleware(
           (request) {
             throw const HijackException();
@@ -119,12 +108,11 @@ void main() {
         );
       });
 
-      test('injects a GcpLogger into the Request context', () async {
+      test('injects a RequestLogger into the Request context', () async {
         final modifiedRequest = MockShelfRequest();
         when(() => modifiedRequest.method).thenReturn('GET');
 
-        final middleware = GcpLogger.middleware(
-          projectIdGetter: () async => 'projectId',
+        final middleware = RequestLogger.middleware(
           logFormatter: testingLogFormatter,
         );
         final newHandler = middleware((request) => response);
@@ -135,13 +123,13 @@ void main() {
             context: any(
               named: 'context',
               that: isA<Map<String, dynamic>>().having(
-                (m) => m['GcpLogger'],
+                (m) => m['RequestLogger'],
                 'logger',
                 isA<Function>().having(
                   // ignore: avoid_dynamic_calls
                   (f) => f.call(),
                   'returns',
-                  isA<GcpLogger>(),
+                  isA<RequestLogger>(),
                 ),
               ),
             ),
@@ -152,11 +140,10 @@ void main() {
       test('logs requests if parameter passed and no error occur', () async {
         final stdout = MockStdout();
 
-        final middleware = GcpLogger.middleware(
+        final middleware = RequestLogger.middleware(
           testingStdout: stdout,
           shouldLogRequests: true,
           logFormatter: testingLogFormatter,
-          projectIdGetter: () async => 'projectId',
         );
         final newHandler = middleware((request) => response);
         await newHandler(request);
@@ -165,11 +152,10 @@ void main() {
       test('logs requests if parameter passed and an error occurs', () async {
         final stdout = MockStdout();
 
-        final middleware = GcpLogger.middleware(
+        final middleware = RequestLogger.middleware(
           testingStdout: stdout,
           shouldLogRequests: true,
           logFormatter: testingLogFormatter,
-          projectIdGetter: () async => 'projectId',
         );
         final newHandler = middleware((request) => throw Error());
         await newHandler(request);
@@ -180,12 +166,15 @@ void main() {
     group('extractLogger', () {
       test('returns logger', () {
         final request = MockShelfRequest();
-        const logger = GcpLogger(logFormatter: formatSimpleLog);
+        final logger = RequestLogger(
+          logFormatter: formatSimpleLog(),
+          request: request,
+        );
         when(() => request.context).thenReturn(
-          {'GcpLogger': () => logger},
+          {'RequestLogger': () => logger},
         );
         expect(
-          GcpLogger.extractLogger(request),
+          RequestLogger.extractLogger(request),
           logger,
         );
       });
@@ -193,10 +182,51 @@ void main() {
         final request = MockShelfRequest();
         when(() => request.context).thenReturn({});
         expect(
-          () => GcpLogger.extractLogger(request),
+          () => RequestLogger.extractLogger(request),
           throwsA(isA<StateError>()),
         );
       });
+    });
+  });
+
+  group('frameFromChain', () {
+    test('returns null if chain is null or empty', () {
+      expect(frameFromChain(null), null);
+      final chain = MockChain();
+      when(() => chain.traces).thenReturn([]);
+      expect(frameFromChain(chain), null);
+    });
+
+    test('returns null if first trace is empty', () {
+      final chain = MockChain();
+      final trace = MockTrace();
+      when(() => chain.traces).thenReturn([trace]);
+      when(() => trace.frames).thenReturn([]);
+      expect(frameFromChain(chain), null);
+    });
+
+    test('returns first frame that is not excluded', () {
+      final chain = MockChain();
+      final trace = MockTrace();
+      final frame1 = MockFrame();
+      final frame2 = MockFrame();
+      when(() => chain.traces).thenReturn([trace]);
+      when(() => trace.frames).thenReturn([frame1, frame2]);
+      when(() => frame1.package).thenReturn('excluded');
+      when(() => frame2.package).thenReturn('included');
+      expect(frameFromChain(chain, packageExcludeList: ['excluded']), frame2);
+    });
+
+    test('returns first frame that if all frames excluded', () {
+      final chain = MockChain();
+      final trace = MockTrace();
+      final frame1 = MockFrame();
+      final frame2 = MockFrame();
+      when(() => chain.traces).thenReturn([trace]);
+      when(() => trace.frames).thenReturn([frame1, frame2]);
+      when(() => frame1.package).thenReturn('excluded');
+      when(() => frame2.package).thenReturn('excluded');
+      expect(frameFromChain(chain, packageExcludeList: ['excluded']), frame1);
     });
   });
 }
