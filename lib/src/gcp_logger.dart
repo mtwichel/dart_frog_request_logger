@@ -28,6 +28,125 @@ class GcpLogger {
   final LogFormatter _logFormatter;
   final Stdout? _testingStdout;
 
+  /// Log an event with no assigned severity level.
+  void normal(
+    String message, {
+    Object? payload,
+    Map<String, dynamic>? labels,
+  }) =>
+      log(
+        Severity.normal,
+        message,
+        payload: payload,
+        labels: labels,
+      );
+
+  /// Log an event with debug or trace information.
+  void debug(
+    String message, {
+    Object? payload,
+    Map<String, dynamic>? labels,
+  }) =>
+      log(
+        Severity.debug,
+        message,
+        payload: payload,
+        labels: labels,
+      );
+
+  /// Log an event with routine information, such as ongoing status or
+  /// performance.
+  void info(
+    String message, {
+    Object? payload,
+    Map<String, dynamic>? labels,
+  }) =>
+      log(
+        Severity.info,
+        message,
+        payload: payload,
+        labels: labels,
+      );
+
+  /// Log a normal but significant event, such as start up, shut down, or
+  /// a configuration change.
+  void notice(
+    String message, {
+    Object? payload,
+    Map<String, dynamic>? labels,
+  }) =>
+      log(
+        Severity.notice,
+        message,
+        payload: payload,
+        labels: labels,
+      );
+
+  /// Log an event that might cause problems.
+  void warning(
+    String message, {
+    Object? payload,
+    Map<String, dynamic>? labels,
+  }) =>
+      log(
+        Severity.warning,
+        message,
+        payload: payload,
+        labels: labels,
+      );
+
+  /// Log an event that is likely to cause problems.
+  void error(
+    String message, {
+    Object? payload,
+    Map<String, dynamic>? labels,
+  }) =>
+      log(
+        Severity.error,
+        message,
+        payload: payload,
+        labels: labels,
+      );
+
+  /// Log an event that will cause more severe problems or outages.
+  void critical(
+    String message, {
+    Object? payload,
+    Map<String, dynamic>? labels,
+  }) =>
+      log(
+        Severity.critical,
+        message,
+        payload: payload,
+        labels: labels,
+      );
+
+  /// Log an event where a person must take an action immediately.
+  void alert(
+    String message, {
+    Object? payload,
+    Map<String, dynamic>? labels,
+  }) =>
+      log(
+        Severity.alert,
+        message,
+        payload: payload,
+        labels: labels,
+      );
+
+  /// Log an event where one or more systems are unusable.
+  void emergency(
+    String message, {
+    Object? payload,
+    Map<String, dynamic>? labels,
+  }) =>
+      log(
+        Severity.emergency,
+        message,
+        payload: payload,
+        labels: labels,
+      );
+
   /// Write a new log
   void log(
     Severity severity,
