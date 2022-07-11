@@ -12,7 +12,7 @@ final _router = Router()
 
 Response _rootHandler(Request request) {
   final logger = GcpLogger.extractLogger(request);
-  logger.log(Severity.debug, 'Hello Logs');
+  logger.debug('Hello Logs');
   return Response.ok('Hello, World!\n');
 }
 

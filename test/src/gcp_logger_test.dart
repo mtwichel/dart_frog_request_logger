@@ -21,6 +21,25 @@ void main() {
         ).log(Severity.info, 'message');
         verify(() => stdout.writeln(any())).called(1);
       });
+
+      test('convenience methods call log', () {
+        final stdout = MockStdout();
+        GcpLogger(
+          logFormatter: formatSimpleLog,
+          testingStdout: stdout,
+        )
+          ..alert('alert')
+          ..critical('critical')
+          ..debug('debug')
+          ..emergency('emergency')
+          ..error('error')
+          ..info('info')
+          ..normal('message')
+          ..notice('notice')
+          ..warning('warning');
+
+        verify(() => stdout.writeln(any())).called(9);
+      });
     });
 
     group('middleware', () {
