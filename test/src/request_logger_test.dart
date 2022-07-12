@@ -6,7 +6,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:request_logger/log_formatters.dart';
 import 'package:request_logger/request_logger.dart';
 import 'package:shelf/shelf.dart';
-import 'package:stack_trace/stack_trace.dart';
 import 'package:test/test.dart';
 
 import '../_helpers/_helpers.dart';

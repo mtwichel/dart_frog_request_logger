@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 import 'package:request_logger/request_logger.dart';
 import 'package:shelf/shelf.dart';
-import 'package:stack_trace/stack_trace.dart';
 
 /// Formats the log data into the proper format for Google Cloud Logging
 LogFormatter formatCloudLoggingLog({required String projectId}) => ({

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:request_logger/request_logger.dart';
 import 'package:shelf/shelf.dart';
-import 'package:stack_trace/stack_trace.dart';
 
 /// Formats the log data into a simple format for local output logging
 LogFormatter formatSimpleLog() => ({

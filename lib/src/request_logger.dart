@@ -197,7 +197,6 @@ class RequestLogger {
   }) =>
       (handler) {
         final startTime = nowGetter();
-        final _stdout = testingStdout ?? stdout;
         return (request) async {
           final completer = Completer<Response>.sync();
 

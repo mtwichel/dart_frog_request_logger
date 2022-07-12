@@ -84,6 +84,36 @@ Response _handler(Request request) {
 }
 ```
 
+## Using Different Log Formats
+
+Request logger supports log formats by providing a different `LogFormatter` when adding your middleware. You can either provide your own or use one of the built-in formatters.
+
+### Built-in Formatters
+All of the built in log formats live under `package:request_logger/log_formatters.dart`.
+
+The built-in loggers currently are:
+- `formatSimpleLog()`: Formats a log with no particular specification - great for local development.
+- `formatCloudLoggingLog()`: Formats a log for [Google Cloud Logging](https://cloud.google.com/logging)
+
+### Make You Own Formatter
+You can make your own formatter for your own specification! Just make sure it returns a `String`.
+
+Example:
+```dart
+LogFormatter formatMyCustomLog() => ({
+      required Severity severity,
+      required String message,
+      required Request request,
+      Map<String, dynamic>? payload,
+      Map<String, dynamic>? labels,
+      bool? isError,
+      Chain? chain,
+      Frame? stackFrame,
+    }) {
+      return 'My custom log: $message';
+    };
+```
+
 [ci_badge]: https://github.com/mtwichel/request_logger/actions/workflows/request_logger_verify_and_test.yaml/badge.svg
 [ci_link]: https://github.com/mtwichel/request_logger/actions/workflows/request_logger_verify_and_test.yaml
 [coverage_badge]: https://raw.githubusercontent.com/mtwichel/request_logger/main/coverage_badge.svg
