@@ -1,0 +1,27 @@
+name: Request Logger
+
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+    paths:
+      - .github/workflows/request_logger_verify_and_test.yaml
+      - /**
+
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - .github/workflows/**
+      - /**
+
+
+jobs:
+  verify_and_test:
+    name: Verify and Test
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/dart_package.yml@v1
+    with:
+      working_directory: 
+      min_coverage: 100
