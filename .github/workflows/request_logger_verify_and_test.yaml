@@ -6,16 +6,16 @@ on:
       - master
       - main
     paths:
-      - .github/workflows/request_logger_verify_and_test.yaml
-      - **
+      - '.github/workflows/request_logger_verify_and_test.yaml'
+      - '**'
 
   push:
     branches:
       - master
       - main
     paths:
-      - .github/workflows/**
-      - **
+      - '.github/workflows/**'
+      - '**'
 
 
 jobs:
