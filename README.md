@@ -14,7 +14,7 @@ A middleware for [shelf](https://pub.dev/packages/shelf) and [dart_frog](https:/
 - 📋 Includes a ton of debugging information, including stacktraces.
 - 🧪 100% code coverage verified with [Very Good Workflows](https://github.com/VeryGoodOpenSource/very_good_workflows).
 
-## Quickstart 🚀
+## Quickstart 🚀  
 
 ### Using Dart Frog 🎯🐸
 This is a simplified example. For a full example visit [`/examples/dart_frog`](https://github.com/mtwichel/request_logger/tree/main/examples/dart_frog)
