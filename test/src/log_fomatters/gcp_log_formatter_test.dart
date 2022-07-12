@@ -94,6 +94,20 @@ void main() {
         ),
         {'severity': 'ALERT', 'message': 'message'},
       );
+
+      expectJson(
+        formatCloudLoggingLog(projectId: projectId)(
+          severity: Severity.alert,
+          message: 'message',
+          request: request,
+          labels: {'test': 'test'},
+        ),
+        {
+          'severity': 'ALERT',
+          'message': 'message',
+          'logging.googleapis.com/labels': {'test': 'test'}
+        },
+      );
     });
 
     test('returns log with chain correctly', () {

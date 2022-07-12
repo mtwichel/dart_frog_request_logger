@@ -6,16 +6,16 @@ on:
       - master
       - main
     paths:
-      - .github/workflows/request_logger_verify_and_test.yaml
-      - /**
+      - '.github/workflows/request_logger_verify_and_test.yaml'
+      - '**'
 
   push:
     branches:
       - master
       - main
     paths:
-      - .github/workflows/**
-      - /**
+      - '.github/workflows/**'
+      - '**'
 
 
 jobs:
@@ -23,5 +23,6 @@ jobs:
     name: Verify and Test
     uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/dart_package.yml@v1
     with:
-      working_directory: 
+      working_directory: .
+      dart_sdk: stable
       min_coverage: 100
