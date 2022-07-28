@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -185,103 +184,6 @@ class RequestLogger {
     );
 
     _stdout.writeln(logString);
-  }
-
-  /// Middleware that injects `a` RequestLogger and automatically logs
-  /// uncaught errors
-  static Middleware middleware({
-    required LogFormatter logFormatter,
-    bool shouldLogRequests = false,
-    @visibleForTesting DateTime Function() nowGetter = DateTime.now,
-    @visibleForTesting Stdout? testingStdout,
-  }) =>
-      (handler) {
-        final startTime = nowGetter();
-        return (request) async {
-          final completer = Completer<Response>.sync();
-
-          Request _request;
-          RequestLogger _logger;
-
-          _logger = RequestLogger(
-            request: request,
-            logFormatter: logFormatter,
-            testingStdout: testingStdout,
-          );
-
-          _request = request.change(
-            context: {'RequestLogger': () => _logger},
-          );
-
-          Zone.current.fork(
-            specification: ZoneSpecification(
-              handleUncaughtError: (self, parent, _zone, error, stackTrace) {
-                if (error is HijackException) {
-                  completer.completeError(error, stackTrace);
-                }
-                if (completer.isCompleted) {
-                  return;
-                }
-
-                _logger.log(
-                  Severity.error,
-                  error.toString().trim(),
-                  stackTrace: stackTrace,
-                  includeStacktrace: true,
-                  isError: true,
-                );
-
-                if (shouldLogRequests) {
-                  _logger.log(
-                    Severity.info,
-                    '${startTime.toIso8601String()}\t${_request.method}'
-                    '\t[500]\t${request.handlerPath}',
-                    includeSourceLocation: false,
-                  );
-                }
-
-                completer.complete(
-                  Response(
-                    HttpStatus.internalServerError,
-                    body: 'Internal Server Error',
-                  ),
-                );
-              },
-            ),
-          ).runGuarded(
-            () async {
-              final response = await handler(_request);
-              if (shouldLogRequests) {
-                _logger.log(
-                  Severity.info,
-                  '${startTime.toIso8601String()}\t${_request.method}'
-                  '\t[500]\t${request.handlerPath}',
-                  includeSourceLocation: false,
-                );
-              }
-              if (!completer.isCompleted) {
-                completer.complete(response);
-              }
-            },
-          );
-
-          return completer.future;
-        };
-      };
-
-  /// Extracts the [RequestLogger] if injected using the
-  /// [RequestLogger.middleware]
-  static RequestLogger extractLogger(Request request) {
-    // ignore: cast_nullable_to_non_nullable
-    final loggerGetter =
-        request.context['RequestLogger'] as RequestLogger Function()?;
-    if (loggerGetter == null) {
-      throw StateError(
-        'No RequestLogger found. '
-        'Did you forget to inject the RequestLogger.middlware?',
-      );
-    }
-    return loggerGetter();
   }
 }
 
