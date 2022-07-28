@@ -181,8 +181,9 @@ class RequestLogger {
       chain: includeStacktrace ? chain : null,
       stackFrame: includeSourceLocation ? stackFrame : null,
     );
-
-    _stdout.writeln(logString);
+    _stdout
+      ..writeln()
+      ..writeln(logString);
   }
 }
 
