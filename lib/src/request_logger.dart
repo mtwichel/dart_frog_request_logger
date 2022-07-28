@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:request_logger/request_logger.dart';
-import 'package:shelf/shelf.dart';
 
 /// {@template request_logger}
 /// A logger middleware for shelf that formats its messages according to its
@@ -13,16 +12,16 @@ import 'package:shelf/shelf.dart';
 class RequestLogger {
   /// {@macro request_logger}
   const RequestLogger({
-    required Request request,
+    required Map<String, String?> headers,
     required LogFormatter logFormatter,
     @visibleForTesting Stdout? testingStdout,
-  })  : _request = request,
+  })  : _headers = headers,
         _logFormatter = logFormatter,
         _testingStdout = testingStdout;
 
-  final Request _request;
   final LogFormatter _logFormatter;
   final Stdout? _testingStdout;
+  final Map<String, String?> _headers;
 
   /// Log an event with no assigned severity level.
   void normal(
@@ -175,7 +174,7 @@ class RequestLogger {
     final logString = _logFormatter(
       severity: severity,
       message: message,
-      request: _request,
+      headers: _headers,
       payload: payloadMap,
       labels: labels,
       isError: isError,

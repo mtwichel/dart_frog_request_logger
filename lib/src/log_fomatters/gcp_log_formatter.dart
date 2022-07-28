@@ -2,20 +2,19 @@ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:request_logger/request_logger.dart';
-import 'package:shelf/shelf.dart';
 
 /// Formats the log data into the proper format for Google Cloud Logging
 LogFormatter formatCloudLoggingLog({required String projectId}) => ({
       required Severity severity,
       required String message,
-      required Request request,
+      required Map<String, String?> headers,
       Map<String, dynamic>? payload,
       Map<String, dynamic>? labels,
       bool? isError,
       Chain? chain,
       Frame? stackFrame,
     }) {
-      final trace = request.headers['X-Cloud-Trace-Context']?.split('/').first;
+      final trace = headers['X-Cloud-Trace-Context']?.split('/').first;
 
       final log = <String, dynamic>{
         if (isError ?? false)
