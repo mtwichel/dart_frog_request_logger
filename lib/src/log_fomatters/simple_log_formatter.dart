@@ -46,5 +46,7 @@ LogFormatter formatSimpleLog() => ({
           ..write(chain.toString().trim());
       }
 
+      buffer.writeln();
+
       return buffer.toString();
     };
