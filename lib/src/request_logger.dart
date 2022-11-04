@@ -170,7 +170,13 @@ class RequestLogger {
       packageExcludeList: packageExcludeList,
     );
 
-    final payloadMap = jsonDecode(jsonEncode(payload)) as Map<String, dynamic>?;
+    Map<String, dynamic>? payloadMap;
+    try {
+      payloadMap = jsonDecode(jsonEncode(payload)) as Map<String, dynamic>?;
+      // ignore: avoid_catching_errors
+    } on NoSuchMethodError {
+      payloadMap = {'details': payload.toString()};
+    }
     final logString = _logFormatter(
       severity: severity,
       message: message,
