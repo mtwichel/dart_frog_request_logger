@@ -173,8 +173,7 @@ class RequestLogger {
     Map<String, dynamic>? payloadMap;
     try {
       payloadMap = jsonDecode(jsonEncode(payload)) as Map<String, dynamic>?;
-      // ignore: avoid_catching_errors
-    } on NoSuchMethodError {
+    } catch (_) {
       payloadMap = {'details': payload.toString()};
     }
     final logString = _logFormatter(
