@@ -4,8 +4,11 @@ import 'package:request_logger/request_logger.dart';
 
 Handler middleware(Handler handler) {
   return handler.use(
-    fromShelfMiddleware(
-      RequestLogger.middleware(logFormatter: formatSimpleLog()),
+    provider<RequestLogger>(
+      (context) => RequestLogger(
+        headers: context.request.headers,
+        logFormatter: formatSimpleLog(),
+      ),
     ),
   );
 }
