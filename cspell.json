@@ -1,0 +1,17 @@
+{
+  "version": "0.2",
+  "ignorePaths": [],
+  "dictionaryDefinitions": [],
+  "dictionaries": [],
+  "words": [
+    "clouderrorreporting",
+    "endtemplate",
+    "googleapis",
+    "mocktail",
+    "pubspec",
+    "Quickstart",
+    "writeln"
+  ],
+  "ignoreWords": [],
+  "import": []
+}

@@ -1,3 +1,3 @@
 library log_formatters;
 
-export 'src/log_fomatters/log_formatters.dart';
+export 'src/log_formatters/log_formatters.dart';

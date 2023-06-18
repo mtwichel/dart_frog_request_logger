@@ -1,13 +1,12 @@
 import 'dart:convert';
 
-import 'package:request_logger/request_logger.dart';
-import 'package:shelf/shelf.dart';
+import 'package:dart_frog_request_logger/dart_frog_request_logger.dart';
 
 /// Formats the log data into a simple format for local output logging
 LogFormatter formatSimpleLog() => ({
       required Severity severity,
       required String message,
-      required Request request,
+      required Map<String, String?> headers,
       Map<String, dynamic>? payload,
       Map<String, dynamic>? labels,
       bool? isError,
@@ -46,6 +45,8 @@ LogFormatter formatSimpleLog() => ({
           ..writeln()
           ..write(chain.toString().trim());
       }
+
+      buffer.writeln();
 
       return buffer.toString();
     };

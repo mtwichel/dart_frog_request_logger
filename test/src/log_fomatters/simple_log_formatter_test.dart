@@ -1,21 +1,20 @@
+import 'package:dart_frog_request_logger/dart_frog_request_logger.dart';
+import 'package:dart_frog_request_logger/log_formatters.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:request_logger/log_formatters.dart';
-import 'package:request_logger/request_logger.dart';
 import 'package:test/test.dart';
 
 import '../../_helpers/_helpers.dart';
 
 void main() {
   group('formatSimpleLog()', () {
-    final request = MockShelfRequest();
     test('returns base log correctly', () {
       expect(
         formatSimpleLog()(
           severity: Severity.alert,
           message: 'message',
-          request: request,
+          headers: {},
         ),
-        '[ALERT] message',
+        '[ALERT] message\n',
       );
     });
 
@@ -30,11 +29,11 @@ void main() {
         formatSimpleLog()(
           severity: Severity.alert,
           message: 'message',
-          request: request,
+          headers: {},
           stackFrame: stackFrame,
         ),
         '[ALERT] message\n'
-        '  file:1:1 (function)',
+        '  file:1:1 (function)\n',
       );
     });
 
@@ -43,11 +42,11 @@ void main() {
         formatSimpleLog()(
           severity: Severity.alert,
           message: 'message',
-          request: request,
+          headers: {},
           labels: {'test': 'test'},
         ),
         '[ALERT] message\n'
-        '  Labels: {"test":"test"}',
+        '  Labels: {"test":"test"}\n',
       );
     });
 
@@ -56,11 +55,11 @@ void main() {
         formatSimpleLog()(
           severity: Severity.alert,
           message: 'message',
-          request: request,
+          headers: {},
           payload: {'test': 'test'},
         ),
         '[ALERT] message\n'
-        '  Payload: {"test":"test"}',
+        '  Payload: {"test":"test"}\n',
       );
     });
     test('returns log with chain correctly', () {
@@ -69,11 +68,11 @@ void main() {
         formatSimpleLog()(
           severity: Severity.alert,
           message: 'message',
-          request: request,
+          headers: {},
           chain: chain,
         ),
         '[ALERT] message\n'
-        'chain',
+        'chain\n',
       );
     });
   });

@@ -1,9 +1,8 @@
 // ignore_for_file: unnecessary_lambdas
 
+import 'package:dart_frog_request_logger/dart_frog_request_logger.dart';
+import 'package:dart_frog_request_logger/log_formatters.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:request_logger/request_logger.dart';
-import 'package:request_logger/src/log_fomatters/log_formatters.dart';
-import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 
 import '../../_helpers/_helpers.dart';
@@ -12,18 +11,12 @@ const projectId = 'projectId';
 
 void main() {
   group('formatCloudLoggingLog', () {
-    late Request request;
-    setUp(() {
-      request = MockShelfRequest();
-      when(() => request.context).thenReturn({});
-      when(() => request.headers).thenReturn({});
-    });
     test('returns base log correctly', () {
       expectJson(
         formatCloudLoggingLog(projectId: projectId)(
           severity: Severity.alert,
           message: 'message',
-          request: request,
+          headers: {},
         ),
         {'severity': 'ALERT', 'message': 'message'},
       );
@@ -33,8 +26,8 @@ void main() {
         formatCloudLoggingLog(projectId: projectId)(
           severity: Severity.alert,
           message: 'message',
-          request: request,
           payload: {'test': 'test'},
+          headers: {},
         ),
         {'severity': 'ALERT', 'message': 'message', 'test': 'test'},
       );
@@ -44,7 +37,7 @@ void main() {
         formatCloudLoggingLog(projectId: projectId)(
           severity: Severity.alert,
           message: 'message',
-          request: request,
+          headers: {},
           isError: true,
         ),
         {
@@ -61,19 +54,17 @@ void main() {
           formatCloudLoggingLog(projectId: projectId)(
             severity: Severity.alert,
             message: 'message',
-            request: request,
+            headers: {},
           ),
           {'severity': 'ALERT', 'message': 'message'},
         );
       });
       test('when trace is present', () {
-        when(() => request.headers)
-            .thenReturn({'X-Cloud-Trace-Context': 'trace/1'});
         expectJson(
           formatCloudLoggingLog(projectId: projectId)(
             severity: Severity.alert,
             message: 'message',
-            request: request,
+            headers: {'X-Cloud-Trace-Context': 'trace/1'},
           ),
           {
             'severity': 'ALERT',
@@ -89,8 +80,8 @@ void main() {
         formatCloudLoggingLog(projectId: projectId)(
           severity: Severity.alert,
           message: 'message',
-          request: request,
           labels: {},
+          headers: {},
         ),
         {'severity': 'ALERT', 'message': 'message'},
       );
@@ -99,8 +90,8 @@ void main() {
         formatCloudLoggingLog(projectId: projectId)(
           severity: Severity.alert,
           message: 'message',
-          request: request,
           labels: {'test': 'test'},
+          headers: {},
         ),
         {
           'severity': 'ALERT',
@@ -116,8 +107,8 @@ void main() {
         formatCloudLoggingLog(projectId: projectId)(
           severity: Severity.alert,
           message: 'message',
-          request: request,
           chain: chain,
+          headers: {},
         ),
         {'severity': 'ALERT', 'message': 'message', 'stackTrace': 'chain'},
       );
@@ -131,8 +122,8 @@ void main() {
         formatCloudLoggingLog(projectId: projectId)(
           severity: Severity.alert,
           message: 'message',
-          request: request,
           stackFrame: stackFrame,
+          headers: {},
         ),
         {
           'severity': 'ALERT',

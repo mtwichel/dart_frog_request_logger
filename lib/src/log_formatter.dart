@@ -1,5 +1,4 @@
-import 'package:request_logger/request_logger.dart';
-import 'package:shelf/shelf.dart';
+import 'package:dart_frog_request_logger/dart_frog_request_logger.dart';
 
 /// A function that formats a new log string.
 ///
@@ -17,7 +16,7 @@ import 'package:shelf/shelf.dart';
 typedef LogFormatter = String Function({
   required Severity severity,
   required String message,
-  required Request request,
+  required Map<String, String?> headers,
   Map<String, dynamic>? payload,
   Map<String, dynamic>? labels,
   bool? isError,

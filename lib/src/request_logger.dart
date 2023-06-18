@@ -1,11 +1,9 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:dart_frog_request_logger/dart_frog_request_logger.dart';
 import 'package:meta/meta.dart';
-import 'package:request_logger/request_logger.dart';
-import 'package:shelf/shelf.dart';
 
 /// {@template request_logger}
 /// A logger middleware for shelf that formats its messages according to its
@@ -14,16 +12,16 @@ import 'package:shelf/shelf.dart';
 class RequestLogger {
   /// {@macro request_logger}
   const RequestLogger({
-    required Request request,
+    required Map<String, String?> headers,
     required LogFormatter logFormatter,
     @visibleForTesting Stdout? testingStdout,
-  })  : _request = request,
+  })  : _headers = headers,
         _logFormatter = logFormatter,
         _testingStdout = testingStdout;
 
-  final Request _request;
   final LogFormatter _logFormatter;
   final Stdout? _testingStdout;
+  final Map<String, String?> _headers;
 
   /// Log an event with no assigned severity level.
   void normal(
@@ -172,116 +170,23 @@ class RequestLogger {
       packageExcludeList: packageExcludeList,
     );
 
-    final payloadMap = jsonDecode(jsonEncode(payload)) as Map<String, dynamic>?;
+    Map<String, dynamic>? payloadMap;
+    try {
+      payloadMap = jsonDecode(jsonEncode(payload)) as Map<String, dynamic>?;
+    } catch (_) {
+      payloadMap = {'details': payload.toString()};
+    }
     final logString = _logFormatter(
       severity: severity,
       message: message,
-      request: _request,
+      headers: _headers,
       payload: payloadMap,
       labels: labels,
       isError: isError,
       chain: includeStacktrace ? chain : null,
       stackFrame: includeSourceLocation ? stackFrame : null,
     );
-
     _stdout.writeln(logString);
-  }
-
-  /// Middleware that injects `a` RequestLogger and automatically logs
-  /// uncaught errors
-  static Middleware middleware({
-    required LogFormatter logFormatter,
-    bool shouldLogRequests = false,
-    @visibleForTesting DateTime Function() nowGetter = DateTime.now,
-    @visibleForTesting Stdout? testingStdout,
-  }) =>
-      (handler) {
-        final startTime = nowGetter();
-        return (request) async {
-          final completer = Completer<Response>.sync();
-
-          Request _request;
-          RequestLogger _logger;
-
-          _logger = RequestLogger(
-            request: request,
-            logFormatter: logFormatter,
-            testingStdout: testingStdout,
-          );
-
-          _request = request.change(
-            context: {'RequestLogger': () => _logger},
-          );
-
-          Zone.current.fork(
-            specification: ZoneSpecification(
-              handleUncaughtError: (self, parent, _zone, error, stackTrace) {
-                if (error is HijackException) {
-                  completer.completeError(error, stackTrace);
-                }
-                if (completer.isCompleted) {
-                  return;
-                }
-
-                _logger.log(
-                  Severity.error,
-                  error.toString().trim(),
-                  stackTrace: stackTrace,
-                  includeStacktrace: true,
-                  isError: true,
-                );
-
-                if (shouldLogRequests) {
-                  _logger.log(
-                    Severity.info,
-                    '${startTime.toIso8601String()}\t${_request.method}'
-                    '\t[500]\t${request.handlerPath}',
-                    includeSourceLocation: false,
-                  );
-                }
-
-                completer.complete(
-                  Response(
-                    HttpStatus.internalServerError,
-                    body: 'Internal Server Error',
-                  ),
-                );
-              },
-            ),
-          ).runGuarded(
-            () async {
-              final response = await handler(_request);
-              if (shouldLogRequests) {
-                _logger.log(
-                  Severity.info,
-                  '${startTime.toIso8601String()}\t${_request.method}'
-                  '\t[500]\t${request.handlerPath}',
-                  includeSourceLocation: false,
-                );
-              }
-              if (!completer.isCompleted) {
-                completer.complete(response);
-              }
-            },
-          );
-
-          return completer.future;
-        };
-      };
-
-  /// Extracts the [RequestLogger] if injected using the
-  /// [RequestLogger.middleware]
-  static RequestLogger extractLogger(Request request) {
-    // ignore: cast_nullable_to_non_nullable
-    final loggerGetter =
-        request.context['RequestLogger'] as RequestLogger Function()?;
-    if (loggerGetter == null) {
-      throw StateError(
-        'No RequestLogger found. '
-        'Did you forget to inject the RequestLogger.middlware?',
-      );
-    }
-    return loggerGetter();
   }
 }
 
