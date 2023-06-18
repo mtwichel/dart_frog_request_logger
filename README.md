@@ -20,7 +20,7 @@ This is a simplified example. For a full example visit [`/examples/dart_frog`](h
 
 ### Setup 🏗️
 
-Add the `RequestLogger` middlware in your top level `_middlware.dart` file.
+Add the `RequestLogger` middleware in your top level `_middleware.dart` file.
 
 ```dart
 import 'package:dart_frog/dart_frog.dart';
