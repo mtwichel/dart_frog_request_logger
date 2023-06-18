@@ -5,7 +5,12 @@ import 'package:test/test.dart';
 
 class _MockFrame extends Mock implements Frame {}
 
-class _MockChain extends Mock implements Chain {}
+class _MockChain extends Mock implements Chain {
+  @override
+  String toString() {
+    return 'chain';
+  }
+}
 
 void main() {
   group('formatSimpleLog()', () {

@@ -1,5 +1,3 @@
-// ignore_for_file: unnecessary_lambdas
-
 import 'package:dart_frog_request_logger/dart_frog_request_logger.dart';
 import 'package:dart_frog_request_logger/log_formatters.dart';
 import 'package:mocktail/mocktail.dart';
@@ -9,7 +7,12 @@ import '../../_helpers/_helpers.dart';
 
 class _MockFrame extends Mock implements Frame {}
 
-class _MockChain extends Mock implements Chain {}
+class _MockChain extends Mock implements Chain {
+  @override
+  String toString() {
+    return 'chain';
+  }
+}
 
 const projectId = 'projectId';
 
