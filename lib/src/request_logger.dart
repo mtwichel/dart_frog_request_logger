@@ -158,7 +158,7 @@ class RequestLogger {
       'request_logger'
     ],
   }) {
-    final _stdout = _testingStdout ?? stdout;
+    final resolvedStdout = _testingStdout ?? stdout;
     final chain =
         (stackTrace != null ? Chain.forTrace(stackTrace) : Chain.current())
             .foldFrames(
@@ -186,7 +186,7 @@ class RequestLogger {
       chain: includeStacktrace ? chain : null,
       stackFrame: includeSourceLocation ? stackFrame : null,
     );
-    _stdout.writeln(logString);
+    resolvedStdout.writeln(logString);
   }
 }
 
