@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:dart_frog_request_logger/dart_frog_request_logger.dart';
 import 'package:meta/meta.dart';
-import 'package:request_logger/request_logger.dart';
 
 /// {@template request_logger}
 /// A logger middleware for shelf that formats its messages according to its

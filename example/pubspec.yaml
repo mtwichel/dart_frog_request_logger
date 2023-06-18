@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   dart_frog: ^0.3.7
-  request_logger:
+  dart_frog_request_logger:
     path: ..
 
 dev_dependencies:

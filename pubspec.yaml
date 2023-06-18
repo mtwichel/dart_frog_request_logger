@@ -1,13 +1,12 @@
-name: request_logger
-description: A logger middleware for shelf and dart_frog
-version: 0.0.1-dev.1
-repository: https://github.com/mtwichel/request_logger
-publish_to: none
+name: dart_frog_request_logger
+description: A logger middleware for dart_frog
+version: 0.0.1
+repository: https://github.com/mtwichel/dart_frog_request_logger
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
-  
-dependencies: 
+
+dependencies:
   collection: ^1.16.0
   http: ^0.13.4
   stack_trace: ^1.10.0

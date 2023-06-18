@@ -1,6 +1,6 @@
 import 'package:dart_frog/dart_frog.dart';
+import 'package:dart_frog_request_logger/dart_frog_request_logger.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:request_logger/request_logger.dart';
 import 'package:test/test.dart';
 
 import '../../routes/index.dart' as route;

@@ -1,8 +1,8 @@
 // ignore_for_file: unnecessary_lambdas
 
+import 'package:dart_frog_request_logger/dart_frog_request_logger.dart';
+import 'package:dart_frog_request_logger/log_formatters.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:request_logger/log_formatters.dart';
-import 'package:request_logger/request_logger.dart';
 import 'package:test/test.dart';
 
 import '../../_helpers/_helpers.dart';
