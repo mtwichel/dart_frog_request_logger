@@ -3,7 +3,14 @@ import 'package:dart_frog_request_logger/log_formatters.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-import '../../_helpers/_helpers.dart';
+class _MockFrame extends Mock implements Frame {}
+
+class _MockChain extends Mock implements Chain {
+  @override
+  String toString() {
+    return 'chain';
+  }
+}
 
 void main() {
   group('formatSimpleLog()', () {
@@ -19,7 +26,7 @@ void main() {
     });
 
     test('returns log with stack frame correctly', () {
-      final stackFrame = MockFrame();
+      final stackFrame = _MockFrame();
       when(() => stackFrame.library).thenReturn('file');
       when(() => stackFrame.line).thenReturn(1);
       when(() => stackFrame.column).thenReturn(1);
@@ -63,7 +70,7 @@ void main() {
       );
     });
     test('returns log with chain correctly', () {
-      final chain = MockChain();
+      final chain = _MockChain();
       expect(
         formatSimpleLog()(
           severity: Severity.alert,

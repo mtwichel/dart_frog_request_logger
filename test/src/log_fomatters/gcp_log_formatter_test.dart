@@ -1,11 +1,18 @@
-// ignore_for_file: unnecessary_lambdas
-
 import 'package:dart_frog_request_logger/dart_frog_request_logger.dart';
 import 'package:dart_frog_request_logger/log_formatters.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 import '../../_helpers/_helpers.dart';
+
+class _MockFrame extends Mock implements Frame {}
+
+class _MockChain extends Mock implements Chain {
+  @override
+  String toString() {
+    return 'chain';
+  }
+}
 
 const projectId = 'projectId';
 
@@ -102,7 +109,7 @@ void main() {
     });
 
     test('returns log with chain correctly', () {
-      final chain = MockChain();
+      final chain = _MockChain();
       expectJson(
         formatCloudLoggingLog(projectId: projectId)(
           severity: Severity.alert,
@@ -114,7 +121,7 @@ void main() {
       );
     });
     test('returns log with stackFrame correctly', () {
-      final stackFrame = MockFrame();
+      final stackFrame = _MockFrame();
       when(() => stackFrame.library).thenReturn('file');
       when(() => stackFrame.line).thenReturn(1);
       when(() => stackFrame.member).thenReturn('function');
@@ -137,7 +144,7 @@ void main() {
 
   group('frameToSourceInformation', () {
     test('returns correctly', () {
-      final frame = MockFrame();
+      final frame = _MockFrame();
       when(() => frame.library).thenReturn('file');
       when(() => frame.line).thenReturn(1);
       when(() => frame.member).thenReturn('function');

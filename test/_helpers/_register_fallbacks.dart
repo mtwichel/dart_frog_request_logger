@@ -1,7 +1,7 @@
 import 'package:mocktail/mocktail.dart';
 
-import '_helpers.dart';
+class _MockUri extends Mock implements Uri {}
 
 void registerFallbacks() {
-  registerFallbackValue(MockUri());
+  registerFallbackValue(_MockUri());
 }
