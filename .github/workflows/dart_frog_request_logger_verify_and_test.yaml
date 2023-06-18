@@ -1,4 +1,4 @@
-name: Request Logger
+name: Dart Frog Request Logger
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -10,17 +10,16 @@ on:
       - master
       - main
     paths:
-      - '.github/workflows/request_logger_verify_and_test.yaml'
-      - '**'
+      - ".github/workflows/dart_frog_request_logger_verify_and_test.yaml"
+      - "**"
 
   push:
     branches:
       - master
       - main
     paths:
-      - '.github/workflows/**'
-      - '**'
-
+      - ".github/workflows/**"
+      - "**"
 
 jobs:
   verify_and_test:
