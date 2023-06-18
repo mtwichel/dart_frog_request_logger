@@ -30,6 +30,6 @@ jobs:
       working_directory: example
       dart_sdk: stable
       min_coverage: 100
-      report_on: lib,routes
-      analyze_directories: lib test routes
-      format_directories: lib test routes
+      report_on: routes
+      analyze_directories: test routes
+      format_directories: test routes
