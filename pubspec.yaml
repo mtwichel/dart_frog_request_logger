@@ -1,6 +1,6 @@
 name: dart_frog_request_logger
 description: A logging helper for dart_frog servers. Supports logging for Google Cloud and local development.
-version: 0.0.1
+version: 0.0.2
 repository: https://github.com/mtwichel/dart_frog_request_logger
 issue_tracker: https://github.com/mtwichel/dart_frog_request_logger/issues
 
