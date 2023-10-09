@@ -1,0 +1,6 @@
+report_on: routes
+analyze_directories:
+  - test
+  - routes
+coverage_exclude:
+  - "**/_middleware.dart"

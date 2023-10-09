@@ -12,7 +12,7 @@ on:
     paths:
       - ".github/workflows/dart_frog_logger_example_verify_and_test.yaml"
       - "example/**"
-      - ./**
+      - "./**"
   push:
     branches:
       - master
@@ -20,7 +20,7 @@ on:
     paths:
       - ".github/workflows/**"
       - "example/**"
-      - ./**
+      - "./**"
 
 jobs:
   verify_and_test:
@@ -28,8 +28,8 @@ jobs:
     uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/dart_package.yml@main
     with:
       working_directory: example
+      coverage_excludes: "**/_middleware.dart"
+      analyze_directories: "test routes"
+      report_on: "routes"
       dart_sdk: stable
       min_coverage: 100
-      report_on: routes
-      analyze_directories: test routes
-      format_directories: test routes

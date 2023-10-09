@@ -88,8 +88,8 @@ LogFormatter formatMyCustomLog() => ({
     };
 ```
 
-[ci_badge]: https://github.com/mtwichel/request_logger/actions/workflows/request_logger_verify_and_test.yaml/badge.svg
-[ci_link]: https://github.com/mtwichel/request_logger/actions/workflows/request_logger_verify_and_test.yaml
+[ci_badge]: https://github.com/mtwichel/request_logger/actions/workflows/dart_frog_request_logger_verify_and_test.yaml/badge.svg
+[ci_link]: https://github.com/mtwichel/request_logger/actions/workflows/dart_frog_request_logger_verify_and_test.yaml
 [coverage_badge]: https://raw.githubusercontent.com/mtwichel/request_logger/main/coverage_badge.svg
 [license_badge]: https://img.shields.io/badge/license-MIT-blue.svg
 [license_link]: https://opensource.org/licenses/MIT
