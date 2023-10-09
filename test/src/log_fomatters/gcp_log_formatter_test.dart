@@ -76,7 +76,7 @@ void main() {
           {
             'severity': 'ALERT',
             'message': 'message',
-            'logging.googleapis.com/trace': 'projects/projectId/traces/trace'
+            'logging.googleapis.com/trace': 'projects/projectId/traces/trace',
           },
         );
       });
@@ -103,7 +103,7 @@ void main() {
         {
           'severity': 'ALERT',
           'message': 'message',
-          'logging.googleapis.com/labels': {'test': 'test'}
+          'logging.googleapis.com/labels': {'test': 'test'},
         },
       );
     });
@@ -136,7 +136,7 @@ void main() {
           'severity': 'ALERT',
           'message': 'message',
           'logging.googleapis.com/sourceLocation':
-              frameToSourceInformation(stackFrame)
+              frameToSourceInformation(stackFrame),
         },
       );
     });
