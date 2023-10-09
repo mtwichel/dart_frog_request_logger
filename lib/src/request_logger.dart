@@ -155,7 +155,7 @@ class RequestLogger {
     List<String> packageExcludeList = const [
       'dart_frog',
       'shelf',
-      'request_logger'
+      'request_logger',
     ],
   }) {
     final resolvedStdout = _testingStdout ?? stdout;
